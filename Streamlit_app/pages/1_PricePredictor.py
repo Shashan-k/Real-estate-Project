@@ -8,15 +8,18 @@ st.set_page_config(page_title = 'House Price Prediction Webpage')
 # ['property_type', 'sector', 'bedRoom', 'bathroom', 'balcony',
 #       'agePossession', 'built_up_area', 'servant room', 'store room',
 #      'furnishing_type', 'luxury_category', 'floor_category']
-with open ('D:/Projects/Research/CapstoneCampusX/StreamlitApp_PircePred/pipeline.pkl','rb') as file:
+with open ('pipeline.pkl','rb') as file:
     pipeline = pickle.load(file)
 
-with open ('D:/Projects/Research/CapstoneCampusX/StreamlitApp_PircePred/df.pkl', 'rb') as file:
+with open ('df.pkl', 'rb') as file:
     df = pickle.load(file)
     
 #st.dataframe(df)
+st.write("## Price Prediction")
+st.write("Predict the price of your dream property with just a few clicks!")
 
-st.header("Price Predictor: Enter the inputs")
+# Input Form
+st.write("#### Input Parameters")
 
 # Property_type
 property_type = st.selectbox('Property Type', df['property_type'].unique())

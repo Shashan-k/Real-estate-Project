@@ -1,4 +1,4 @@
-# To know the most expensive / least expensive sector in Gurgaon
+# To know the most expensive / least expensive sector in Gurgaon - Average price per sqft -> plot on geomap
 # Word Cloud of features
 # Scatterplot -> area vs price
 # pie chart bhk filter
@@ -13,13 +13,16 @@ import seaborn as sns
 
 st.set_page_config(page_title="Plotting Demo")
 
-st.title('Analytics')
+st.title("Analytics Module")
+st.write("# Explore real estate trends and insights.")
 
+##### GeoMap
 new_df = pd.read_csv('datasets/data_viz1.csv')
 feature_text = pickle.load(open('datasets/feature_text.pkl','rb'))
 
-
-group_df = new_df.groupby('sector').mean()[['price','price_per_sqft','built_up_area','latitude','longitude']]
+custom_mean = lambda x: x.mean(skipna=True)  # Define a custom mean function that handles NaN values
+group_df = new_df.groupby('sector').agg({'price': custom_mean, 'price_per_sqft': custom_mean, 'built_up_area': custom_mean, 'latitude': custom_mean, 'longitude': custom_mean})
+#group_df = new_df.groupby('sector').mean()[['price','price_per_sqft','built_up_area','latitude','longitude']]
 
 st.header('Sector Price per Sqft Geomap')
 fig = px.scatter_mapbox(group_df, lat="latitude", lon="longitude", color="price_per_sqft", size='built_up_area',
@@ -28,8 +31,9 @@ fig = px.scatter_mapbox(group_df, lat="latitude", lon="longitude", color="price_
 
 st.plotly_chart(fig,use_container_width=True)
 
+#### Wordcloud
 st.header('Features Wordcloud')
-
+st.set_option('deprecation.showPyplotGlobalUse', False) # To suppress the warning message for pyplot
 wordcloud = WordCloud(width = 800, height = 800,
                       background_color ='black',
                       stopwords = set(['s']),  # Any stopwords you'd like to exclude
@@ -41,9 +45,10 @@ plt.axis("off")
 plt.tight_layout(pad = 0)
 st.pyplot()
 
+#### Scatterplot Area vs Price
 st.header('Area Vs Price')
 
-property_type = st.selectbox('Select Property Type', ['flat','house'])
+property_type = st.selectbox('Select Property Type', ['flat','house']) # Giving user the option to select the property type
 
 if property_type == 'house':
     fig1 = px.scatter(new_df[new_df['property_type'] == 'house'], x="built_up_area", y="price", color="bedRoom", title="Area Vs Price")
@@ -55,10 +60,11 @@ else:
 
     st.plotly_chart(fig1, use_container_width=True)
 
+#### Pie Chart BHK
 st.header('BHK Pie Chart')
 
 sector_options = new_df['sector'].unique().tolist()
-sector_options.insert(0,'overall')
+sector_options.insert(0,'overall')                     # Inserting overall option at the beginning of list
 
 selected_sector = st.selectbox('Select Sector', sector_options)
 
@@ -73,6 +79,7 @@ else:
 
     st.plotly_chart(fig2, use_container_width=True)
 
+#### Boxplot BHK Price comparison
 st.header('Side by Side BHK price comparison')
 
 fig3 = px.box(new_df[new_df['bedRoom'] <= 4], x='bedRoom', y='price', title='BHK Price Range')
@@ -80,11 +87,12 @@ fig3 = px.box(new_df[new_df['bedRoom'] <= 4], x='bedRoom', y='price', title='BHK
 st.plotly_chart(fig3, use_container_width=True)
 
 
+# Side by Side Distplot for property type
 st.header('Side by Side Distplot for property type')
 
 fig3 = plt.figure(figsize=(10, 4))
-sns.distplot(new_df[new_df['property_type'] == 'house']['price'],label='house')
-sns.distplot(new_df[new_df['property_type'] == 'flat']['price'], label='flat')
+sns.distplot(new_df[new_df['property_type'] == 'house']['price'],label='house') # As per the plot, the house prices are more spread out.
+sns.distplot(new_df[new_df['property_type'] == 'flat']['price'], label='flat') # As per the plot, the flat prices are standardized
 plt.legend()
 st.pyplot(fig3)
 
